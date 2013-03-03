@@ -6,7 +6,22 @@ COLLECTIONS = \
 	ne_10m_admin_1_states_provinces \
 	ne_10m_admin_1_states_provinces_lakes \
 	ne_10m_us_states \
-	ne_10m_us_states_lakes
+	ne_10m_us_states_lakes \
+	ne_50m_admin_0_countries \
+	ne_50m_admin_0_countries_lakes \
+	ne_50m_admin_1_states_provinces \
+	ne_50m_admin_1_states_provinces_lakes \
+	ne_50m_us_states \
+	ne_50m_us_states_lakes \
+	ne_110m_admin_0_countries \
+	ne_110m_admin_0_countries_lakes \
+	ne_110m_admin_1_states_provinces \
+	ne_110m_admin_1_states_provinces_lakes \
+	ne_110m_us_states \
+	ne_110m_us_states_lakes \
+	us-world-10m \
+	us-world-50m \
+	us-world-110m
 
 all: node_modules $(addprefix topo/,$(addsuffix .json,$(COLLECTIONS)))
 
@@ -63,7 +78,7 @@ geo/ne_%_us_states.json: shp/ne_%_admin_1_states_provinces.shp
 	mkdir -p $(dir $@) && rm -f $@ && ogr2ogr -f 'GeoJSON' -where "iso_a2 = ('US')" $@ $<
 
 topo/ne_%_us_states.json: geo/ne_%_us_states.json
-	mkdir -p $(dir $@) && $(TOPOJSON) -q 1e5 --id-property=postal -p name -s 7e-7 -o $@ -- states=$<
+	mkdir -p $(dir $@) && $(TOPOJSON) -q 1e5 --id-property=code_local -p name -s 7e-7 -o $@ -- states=$<
 
 geo/ne_%_us_states_lakes.json: shp/ne_%_admin_1_states_provinces_lakes.shp
 	rm -f $@ && ogr2ogr -f 'GeoJSON' -where "iso_a2 = ('US')" $@ $<
@@ -75,4 +90,15 @@ topo/world-%.json: shp/ne_%_land.shp shp/ne_%_admin_0_countries.shp
 	mkdir -p $(dir $@) && $(TOPOJSON) -q 1e5 --id-property=+iso_n3 -- land=shp/ne_$*_land.shp countries=shp/ne_$*_admin_0_countries.shp | ./topomerge land > $@
 
 topo/%.json: shp/%.shp
-	mkdir -p $(dir $@) && $(TOPOJSON) --id-property=iso_a2 -o $@ -- $<
+	mkdir -p $(dir $@) && $(TOPOJSON) --id-property=iso_a3 -o $@ -- $<
+
+topo/us-world-10m.json: topo/ne_10m_admin_0_countries.json topo/ne_10m_us_states.json
+	mkdir -p $(dir $@) && $(TOPOJSON) -- $(filter %.json,$^) | ./topouniq ne_10m_admin_0_countries | ./topouniq states > $@
+
+topo/us-world-50m.json: topo/ne_50m_admin_0_countries.json topo/ne_50m_us_states.json
+	mkdir -p $(dir $@) && $(TOPOJSON) -- $(filter %.json,$^) | ./topouniq ne_50m_admin_0_countries | ./topouniq states > $@
+
+topo/us-world-110m.json: topo/ne_110m_admin_0_countries.json topo/ne_110m_us_states.json
+	mkdir -p $(dir $@) && $(TOPOJSON) -- $(filter %.json,$^) | ./topouniq ne_110m_admin_0_countries | ./topouniq states > $@
+
+#./node_modules/topojson/bin/topojson -- topo/ne_50m_admin_0_countries.json topo/ne_50m_us_states.json | ../us-atlas/topouniq ne_50m_admin_0_countries | ../us-atlas/topouniq states  > topo/world-us.json
