@@ -1,0 +1,25 @@
+#!/usr/bin/env node
+
+var fs = require("fs")
+
+var topology = JSON.parse(fs.readFileSync("/dev/stdin"));
+
+topology.objects.countries= topology.objects[process.argv[2]]
+delete topology.objects[process.argv[2]];
+
+var states = topology.objects.states.geometries;
+for(var i = 0, length = states.length; i < length; i++){
+    var state = states[i];
+    state.id = state.id.replace('US', '');
+}
+
+topology.objects.countries.geometries = topology.objects.countries.geometries.filter(function(g){
+    if (g.id === 'USA' || g.id === 'ATA') {
+        return false;
+    }
+    return true;
+
+});
+
+
+console.log(JSON.stringify(topology));
