@@ -17,7 +17,7 @@ topology.objects.countries.geometries = topology.objects.countries.geometries.fi
     if (g.type === null){
         return false;
     }
-    if (g.id === 'USA' || g.id === 'ATA') {
+    if (g.id === 'USA') {
         return false;
     }
     return true;
