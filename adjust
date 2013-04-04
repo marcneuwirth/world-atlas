@@ -4,16 +4,18 @@ var fs = require("fs")
 
 var topology = JSON.parse(fs.readFileSync("/dev/stdin"));
 
-topology.objects.countries= topology.objects[process.argv[2]]
+topology.objects.countries = topology.objects[process.argv[2]]
 delete topology.objects[process.argv[2]];
 
 var states = topology.objects.states.geometries;
 for(var i = 0, length = states.length; i < length; i++){
     var state = states[i];
+    state.properties = undefined;
     state.id = state.id.replace('US', '');
 }
 
 topology.objects.countries.geometries = topology.objects.countries.geometries.filter(function(g){
+    g.properties = undefined;
     if (g.type === null){
         return false;
     }

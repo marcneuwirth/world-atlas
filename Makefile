@@ -93,10 +93,10 @@ topo/world-%.json: shp/ne_%_land.shp shp/ne_%_admin_0_countries.shp
 	mkdir -p $(dir $@) && $(TOPOJSON) -q 1e5 --id-property=+iso_n3 -- land=shp/ne_$*_land.shp countries=shp/ne_$*_admin_0_countries.shp | ./topomerge land > $@
 
 topo/%.json: shp/%.shp
-	mkdir -p $(dir $@) && $(TOPOJSON) --id-property=iso_a3 -o $@ -- $<
+	mkdir -p $(dir $@) && $(TOPOJSON) --id-property=iso_a3 -p name -p iso_a2 -o $@ -- $<
 
 topo/us-world-%.json: topo/ne_%_admin_0_countries.json topo/ne_%_us_states.json
-	mkdir -p $(dir $@) && $(TOPOJSON) -- $(filter %.json,$^) | ./topouniq ne_$*_admin_0_countries | ./topouniq states | ./adjust ne_$*_admin_0_countries > $@
+	mkdir -p $(dir $@) && $(TOPOJSON) -p name -p iso_a2 -- $(filter %.json,$^) | ./topouniq ne_$*_admin_0_countries | ./topouniq states | ./adjust ne_$*_admin_0_countries > $@
 
 topo/us-world-%-lakes.json: topo/ne_%_admin_0_countries_lakes.json topo/ne_%_us_states_lakes.json
-	mkdir -p $(dir $@) && $(TOPOJSON) -- $(filter %.json,$^) | ./topouniq ne_$*_admin_0_countries_lakes | ./topouniq states | ./adjust ne_$*_admin_0_countries_lakes > $@
+	mkdir -p $(dir $@) && $(TOPOJSON) -p name -p iso_a2 -- $(filter %.json,$^) | ./topouniq ne_$*_admin_0_countries_lakes | ./topouniq states | ./adjust ne_$*_admin_0_countries_lakes > $@
